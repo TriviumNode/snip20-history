@@ -1,1 +1,2 @@
-# snip20-history
+# keplr-snip20-transferhistory
+ 
