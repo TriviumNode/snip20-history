@@ -1,7 +1,7 @@
 const { SigningCosmWasmClient } = require("secretjs");
 import Tabulator from 'tabulator-tables';
 const myStorage = window.localStorage;
-const chainId = "secret-2";
+const chainId = process.env.CHAIN_ID;
 
 
 
@@ -98,8 +98,8 @@ document.sendForm.onsubmit = () => {
 	const enigmaUtils = window.getEnigmaUtils(chainId);
 
     const secretJS = new SigningCosmWasmClient(
-		"https://bridge-api-manager.azure-api.net",
-		accounts[0].address,
+		process.env.LCD_API,
+		window.accounts[0].address,
 		offlineSigner,
 		enigmaUtils
 	);
@@ -131,7 +131,7 @@ document.sendForm.onsubmit = () => {
         
                     //Update "From" field with friendly names
                     if (!localStorage.getItem(value.from)) {
-                        fetch("https://scrthost.xiphiar.com:3443/contracts/address/" + value.from).then(res => res.json())
+                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.from).then(res => res.json())
                         .then(function(data) {
                             if (data) {
                                 window.transferTable.updateData([{id:value.id, from:data.data[0].name}]); 
@@ -146,7 +146,7 @@ document.sendForm.onsubmit = () => {
         
                     //Update "Sender" field with friendly names
                     if (!localStorage.getItem(value.sender)) {
-                        fetch("https://scrthost.xiphiar.com:3443/contracts/address/" + value.sender).then(res => res.json())
+                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.sender).then(res => res.json())
                         .then(function(data) {
                             
                             if (data) {
@@ -162,7 +162,7 @@ document.sendForm.onsubmit = () => {
         
                     //Update "Receiver" field with friendly names
                     if (!localStorage.getItem(value.receiver)) {
-                        fetch("https://scrthost.xiphiar.com:3443/contracts/address/" + value.receiver).then(res => res.json())
+                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.receiver).then(res => res.json())
                         .then(function(data) {
                             if (data) {
                                 window.transferTable.updateData([{id:value.id, receiver:data.data[0].name}]); 
