@@ -111,6 +111,24 @@ document.sendForm.onsubmit = () => {
 
         //get viewing key
         window.keplr.getSecret20ViewingKey(process.env.CHAIN_ID, contractAddress).then(function(viewKey) {
+          //query balance using viewing key
+            const balanceQuery = { 
+                balance: {
+                    key: viewKey, 
+                    address: window.accounts[0].address
+                }
+            };
+            secretJS.queryContractSmart(contractAddress, balanceQuery).then(function(balanceData) {
+                let balance = balanceData.balance.amount / Math.pow(10, data.token_info.decimals);
+                console.log("balance", balance, data.token_info.decimals, balanceData.balance);
+                document.getElementById('balance-div').innerHTML = `Balance: ${balance}`;
+                
+            }).catch(function(error) {
+                //query balance errors
+                console.log(error);
+            });
+
+          //query history using viewing key
             const historyQuery = { 
                 transfer_history: {
                     address: window.accounts[0].address, 
@@ -118,8 +136,6 @@ document.sendForm.onsubmit = () => {
                     page_size: 1000
                 } 
             };
-
-            //query history using viewing key
             secretJS.queryContractSmart(contractAddress, historyQuery).then(function(historyData) {
 
                 //show data in table
