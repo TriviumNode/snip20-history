@@ -1,7 +1,6 @@
 const { SigningCosmWasmClient } = require("secretjs");
 import Tabulator from 'tabulator-tables';
 const myStorage = window.localStorage;
-const chainId = process.env.CHAIN_ID;
 
 
 
@@ -43,10 +42,10 @@ window.onload = async () => {
     }
 
     // request Keplr to enable the wallet.
-    await window.keplr.enable(chainId);
+    await window.keplr.enable(process.env.CHAIN_ID);
     console.log("Keplr Enabled");
 
-    let offlineSigner = window.getOfflineSigner(chainId);
+    let offlineSigner = window.getOfflineSigner(process.env.CHAIN_ID);
     window.accounts = await offlineSigner.getAccounts();
     console.log(window.accounts[0].address);
 
@@ -94,8 +93,8 @@ document.sendForm.onsubmit = () => {
         token_info: {}
     };
 
-    const offlineSigner = window.getOfflineSigner(chainId);
-	const enigmaUtils = window.getEnigmaUtils(chainId);
+    const offlineSigner = window.getOfflineSigner(process.env.CHAIN_ID);
+	const enigmaUtils = window.getEnigmaUtils(process.env.CHAIN_ID);
 
     const secretJS = new SigningCosmWasmClient(
 		process.env.LCD_API,
@@ -111,7 +110,7 @@ document.sendForm.onsubmit = () => {
         buildTable(data.token_info.decimals);
 
         //get viewing key
-        window.keplr.getSecret20ViewingKey(chainId, contractAddress).then(function(viewKey) {
+        window.keplr.getSecret20ViewingKey(process.env.CHAIN_ID, contractAddress).then(function(viewKey) {
             const historyQuery = { 
                 transfer_history: {
                     address: window.accounts[0].address, 
