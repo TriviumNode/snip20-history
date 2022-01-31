@@ -141,7 +141,7 @@ document.sendForm.onsubmit = () => {
                 //show data in table
                 window.transferTable.setData(historyData.transfer_history.txs);
 
-                //replace contrace addresses with human friendly names
+                //replace contract addresses with human friendly names
                 for (const [key, value] of Object.entries(historyData.transfer_history.txs)) {
         
                     //Update "From" field with friendly names
@@ -149,7 +149,7 @@ document.sendForm.onsubmit = () => {
                         fetch(process.env.BACKEND_API + "/contracts/address/" + value.from).then(res => res.json())
                         .then(function(data) {
                             if (data) {
-                                window.transferTable.updateData([{id:value.id, from:data.data[0].name}]); 
+                                window.transferTable.updateData([{id:value.id, from:data.data[0].name || data.data[0].label}]); 
                             }
                         })
                         .catch(function(error) {
@@ -165,7 +165,7 @@ document.sendForm.onsubmit = () => {
                         .then(function(data) {
                             
                             if (data) {
-                                window.transferTable.updateData([{id:value.id, sender:data.data[0].name}]); 
+                                window.transferTable.updateData([{id:value.id, sender:data.data[0].name || data.data[0].label}]); 
                             }
                         })
                         .catch(function(error) {
@@ -180,7 +180,7 @@ document.sendForm.onsubmit = () => {
                         fetch(process.env.BACKEND_API + "/contracts/address/" + value.receiver).then(res => res.json())
                         .then(function(data) {
                             if (data) {
-                                window.transferTable.updateData([{id:value.id, receiver:data.data[0].name}]); 
+                                window.transferTable.updateData([{id:value.id, receiver:data.data[0].name || data.data[0].label}]); 
                             }
                         })
                         .catch(function(error) {
