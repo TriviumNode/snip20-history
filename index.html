@@ -34,12 +34,16 @@
         </script>
     </head>
     <body>
-        <div id="app">
+        <nav class="navbar navbar-light" style="background-color: #0067f4;">
+            <a class="navbar-brand" href="https://trivium.network"><img src="https://trivium.network/assets/images/Trivium_w_name.svg"  height="30" alt="Trivium Node" /></a> <span style="color: #fff;">SNIP-20 Transfer History</span>
+          </nav>
+        
+        <div id="app" style="padding-top: 5vh;">
             <div class="container-sm">
             <b>Connected Address:</b>
             <div id="address"></div><br>
             <form name="sendForm" method="get">
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 4px !important;">
                     <label for="contractCont">Select Token: </label>
                     <!-- <input class="form-control" id="contract" name="contract"> -->
                     <select name="contract" id="contractSelector" onchange="checkOther();">
