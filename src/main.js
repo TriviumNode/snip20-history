@@ -18,8 +18,12 @@ const coinMutator =  function(value, data, type, params, component){
     return data.coins.denom; 
 }
 
+const heightMutator =  function(value, data, type, params, component){
+    return data.block_height || "Unsupported"; 
+}
+
 const timeMutator =  function(value, data, type, params, component){
-    if (data.block_time === undefined) {return "No data"} else {
+    if (data.block_time === undefined) {return "Unsupported"} else {
         var date = new Date(data.block_time * 1000);
         return date.toLocaleString();
     }
@@ -60,7 +64,7 @@ function buildTable(decimals) {
         columns:[
             {title:"ID", field:"id", sorter:"number"},
             {title:"Time", field:"block_time", mutator:timeMutator},
-            {title:"Block Height", field:"block_height"},
+            {title:"Block Height", field:"block_height",  mutator:heightMutator}, 
             {title:"TX Sender", field:"sender"},
             {title:"From", field:"from"},
             {title:"To", field:"receiver"},
