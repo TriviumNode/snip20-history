@@ -60,17 +60,17 @@ window.onload = async () => {
 
 function buildTable(decimals) {
     window.transferTable = new Tabulator("#transfer-table", {
-        height:"500px",
+        height:"480px",
         columns:[
-            {title:"ID", field:"id", sorter:"number"},
-            {title:"Time", field:"block_time", mutator:timeMutator},
-            {title:"Block Height", field:"block_height",  mutator:heightMutator}, 
-            {title:"TX Sender", field:"sender"},
-            {title:"From", field:"from"},
-            {title:"To", field:"receiver"},
-            {title:"Memo", field:"memo"},
+            {title:"ID", field:"id", sorter:"number", headerTooltip: "Internal Transfer ID"},
+            {title:"Time", field:"block_time", mutator:timeMutator, headerTooltip: "Transfer time. Not supported by all tokens."},
+            {title:"Block Height", field:"block_height",  mutator:heightMutator, headerTooltip: "Transfer Block. Not supported by all tokens."}, 
+            {title:"TX Sender", field:"sender", headerTooltip: "Address or Contract that initiated the transfer."},
+            {title:"From", field:"from", headerTooltip: "Address or contract that the token was deducted from."},
+            {title:"To", field:"receiver", headerTooltip: "Address or contract that the token was credited to."},
             {title:"Amount", field:"amount", mutator:amountMutator, mutatorParams:{decimals:decimals}},
             {title:"Coin", field:"denom", mutator:coinMutator},
+            {title:"Memo", field:"memo", headerTooltip: "Private memo. Not supported by all tokens."},
         ],
     });
 
