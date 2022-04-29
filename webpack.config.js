@@ -8,7 +8,7 @@ module.exports = {
         main: "./src/main.js",
     },
     output: {
-        filename: "bundle.js",
+        filename: "[name].[contenthash].js",
         path: path.resolve(__dirname,  "dist")
     },
     devServer: {
@@ -21,6 +21,8 @@ module.exports = {
             template: "index.html",
             chunks: ["main"]
         }),
-        new Dotenv()
+        new Dotenv({
+            systemvars: true,
+        })
     ]
 };
