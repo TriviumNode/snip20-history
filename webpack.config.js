@@ -21,6 +21,8 @@ module.exports = {
             template: "index.html",
             chunks: ["main"]
         }),
-        new Dotenv()
+        new Dotenv({
+            systemvars: true,
+        })
     ]
 };
