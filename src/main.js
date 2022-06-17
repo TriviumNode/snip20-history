@@ -2,6 +2,8 @@ const { SigningCosmWasmClient } = require("secretjs");
 import Tabulator from 'tabulator-tables';
 const myStorage = window.localStorage;
 
+let secretJS;
+
 
 
 const amountMutator = function(value, data, type, params, component){
@@ -86,6 +88,94 @@ function buildTable(decimals) {
 
 }
 
+const queryData = async(contractAddress, viewKey, data) => {
+        //get viewing key
+        if (!viewKey) viewKey = await window.keplr.getSecret20ViewingKey(process.env.CHAIN_ID, contractAddress);
+
+        //query balance using viewing key
+        const balanceQuery = { 
+            balance: {
+                key: viewKey, 
+                address: window.accounts[0].address
+            }
+        };
+
+        const balanceData = await secretJS.queryContractSmart(contractAddress, balanceQuery);
+        const humanBalance = balanceData.balance.amount / Math.pow(10, data.token_info.decimals);
+        console.log("balance", humanBalance, data.token_info.decimals, balanceData.balance);
+        document.getElementById('balance-div').innerHTML = `Balance: ${humanBalance}`;
+
+        //query history using viewing key
+        const historyQuery = { 
+            transfer_history: {
+                address: window.accounts[0].address, 
+                key: viewKey,
+                page_size: 1000
+            } 
+        };
+        
+        const historyData = await secretJS.queryContractSmart(contractAddress, historyQuery);
+
+        //show data in table
+        window.transferTable.setData(historyData.transfer_history.txs);
+
+        //replace contract addresses with human friendly names
+        for (const [key, value] of Object.entries(historyData.transfer_history.txs)) {
+
+            //Update "From" field with friendly names
+            if (process.env.USE_BACKEND==='true'){
+                if (!localStorage.getItem(value.from)) {
+                    fetch(process.env.BACKEND_API + "/contracts/address/" + value.from).then(res => res.json())
+                    .then(function(data) {
+                        if (data) {
+                            window.transferTable.updateData([{id:value.id, from:data.data[0].name || data.data[0].label}]); 
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+                } else {
+                    window.transferTable.updateData([{id:value.id, from:localStorage.getItem(value.from)}]);
+                }
+            }
+
+            //Update "Sender" field with friendly names
+            if (process.env.USE_BACKEND==='true'){
+                if (!localStorage.getItem(value.sender)) {
+                    fetch(process.env.BACKEND_API + "/contracts/address/" + value.sender).then(res => res.json())
+                    .then(function(data) {
+                        
+                        if (data) {
+                            window.transferTable.updateData([{id:value.id, sender:data.data[0].name || data.data[0].label}]); 
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+                } else {
+                    window.transferTable.updateData([{id:value.id, sender:localStorage.getItem(value.sender)}]);
+                }
+            }
+
+            //Update "Receiver" field with friendly names
+            if (process.env.USE_BACKEND==='true'){
+                if (!localStorage.getItem(value.receiver)) {
+                    fetch(process.env.BACKEND_API + "/contracts/address/" + value.receiver).then(res => res.json())
+                    .then(function(data) {
+                        if (data) {
+                            window.transferTable.updateData([{id:value.id, receiver:data.data[0].name || data.data[0].label}]); 
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+                } else {
+                    window.transferTable.updateData([{id:value.id, receiver:localStorage.getItem(value.receiver)}]);
+                }
+            }
+        }
+}
+
 
 document.sendForm.onsubmit = () => {
     //prevent reload
@@ -100,7 +190,7 @@ document.sendForm.onsubmit = () => {
     const offlineSigner = window.getOfflineSigner(process.env.CHAIN_ID);
 	const enigmaUtils = window.getEnigmaUtils(process.env.CHAIN_ID);
 
-    const secretJS = new SigningCosmWasmClient(
+    secretJS = new SigningCosmWasmClient(
 		process.env.LCD_API,
 		window.accounts[0].address,
 		offlineSigner,
@@ -115,92 +205,107 @@ document.sendForm.onsubmit = () => {
 
         //get viewing key
         window.keplr.getSecret20ViewingKey(process.env.CHAIN_ID, contractAddress).then(function(viewKey) {
-          //query balance using viewing key
-            const balanceQuery = { 
-                balance: {
-                    key: viewKey, 
-                    address: window.accounts[0].address
-                }
-            };
-            secretJS.queryContractSmart(contractAddress, balanceQuery).then(function(balanceData) {
-                let balance = balanceData.balance.amount / Math.pow(10, data.token_info.decimals);
-                console.log("balance", balance, data.token_info.decimals, balanceData.balance);
-                document.getElementById('balance-div').innerHTML = `Balance: ${balance}`;
+            queryData(contractAddress, viewKey, data);
+            //query balance using viewing key
+            // const balanceQuery = { 
+            //     balance: {
+            //         key: viewKey, 
+            //         address: window.accounts[0].address
+            //     }
+            // };
+            // secretJS.queryContractSmart(contractAddress, balanceQuery).then(function(balanceData) {
+            //     let balance = balanceData.balance.amount / Math.pow(10, data.token_info.decimals);
+            //     console.log("balance", balance, data.token_info.decimals, balanceData.balance);
+            //     document.getElementById('balance-div').innerHTML = `Balance: ${balance}`;
                 
-            }).catch(function(error) {
-                //query balance errors
-                console.log(error);
-            });
+            // }).catch(function(error) {
+            //     //query balance errors
+            //     console.log(error);
+            // });
 
           //query history using viewing key
-            const historyQuery = { 
-                transfer_history: {
-                    address: window.accounts[0].address, 
-                    key: viewKey,
-                    page_size: 1000
-                } 
-            };
-            secretJS.queryContractSmart(contractAddress, historyQuery).then(function(historyData) {
+            // const historyQuery = { 
+            //     transfer_history: {
+            //         address: window.accounts[0].address, 
+            //         key: viewKey,
+            //         page_size: 1000
+            //     } 
+            // };
+            // secretJS.queryContractSmart(contractAddress, historyQuery).then(function(historyData) {
 
-                //show data in table
-                window.transferTable.setData(historyData.transfer_history.txs);
+            //     //show data in table
+            //     window.transferTable.setData(historyData.transfer_history.txs);
 
-                //replace contract addresses with human friendly names
-                for (const [key, value] of Object.entries(historyData.transfer_history.txs)) {
+            //     //replace contract addresses with human friendly names
+            //     for (const [key, value] of Object.entries(historyData.transfer_history.txs)) {
         
-                    //Update "From" field with friendly names
-                    if (!localStorage.getItem(value.from)) {
-                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.from).then(res => res.json())
-                        .then(function(data) {
-                            if (data) {
-                                window.transferTable.updateData([{id:value.id, from:data.data[0].name || data.data[0].label}]); 
-                            }
-                        })
-                        .catch(function(error) {
-                            console.log(error);
-                        });
-                    } else {
-                        window.transferTable.updateData([{id:value.id, from:localStorage.getItem(value.from)}]);
-                    }
+            //         //Update "From" field with friendly names
+            //         if (process.env.USE_BACKEND==='true'){
+            //             if (!localStorage.getItem(value.from)) {
+            //                 fetch(process.env.BACKEND_API + "/contracts/address/" + value.from).then(res => res.json())
+            //                 .then(function(data) {
+            //                     if (data) {
+            //                         window.transferTable.updateData([{id:value.id, from:data.data[0].name || data.data[0].label}]); 
+            //                     }
+            //                 })
+            //                 .catch(function(error) {
+            //                     console.log(error);
+            //                 });
+            //             } else {
+            //                 window.transferTable.updateData([{id:value.id, from:localStorage.getItem(value.from)}]);
+            //             }
+            //         }
         
-                    //Update "Sender" field with friendly names
-                    if (!localStorage.getItem(value.sender)) {
-                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.sender).then(res => res.json())
-                        .then(function(data) {
-                            
-                            if (data) {
-                                window.transferTable.updateData([{id:value.id, sender:data.data[0].name || data.data[0].label}]); 
-                            }
-                        })
-                        .catch(function(error) {
-                            console.log(error);
-                        });
-                    } else {
-                        window.transferTable.updateData([{id:value.id, sender:localStorage.getItem(value.sender)}]);
-                    }
+            //         //Update "Sender" field with friendly names
+            //         if (process.env.USE_BACKEND==='true'){
+            //             if (!localStorage.getItem(value.sender)) {
+            //                 fetch(process.env.BACKEND_API + "/contracts/address/" + value.sender).then(res => res.json())
+            //                 .then(function(data) {
+                                
+            //                     if (data) {
+            //                         window.transferTable.updateData([{id:value.id, sender:data.data[0].name || data.data[0].label}]); 
+            //                     }
+            //                 })
+            //                 .catch(function(error) {
+            //                     console.log(error);
+            //                 });
+            //             } else {
+            //                 window.transferTable.updateData([{id:value.id, sender:localStorage.getItem(value.sender)}]);
+            //             }
+            //         }
         
-                    //Update "Receiver" field with friendly names
-                    if (!localStorage.getItem(value.receiver)) {
-                        fetch(process.env.BACKEND_API + "/contracts/address/" + value.receiver).then(res => res.json())
-                        .then(function(data) {
-                            if (data) {
-                                window.transferTable.updateData([{id:value.id, receiver:data.data[0].name || data.data[0].label}]); 
-                            }
-                        })
-                        .catch(function(error) {
-                            console.log(error);
-                        });
-                    } else {
-                        window.transferTable.updateData([{id:value.id, receiver:localStorage.getItem(value.receiver)}]);
-                    }
-                }
+            //         //Update "Receiver" field with friendly names
+            //         if (process.env.USE_BACKEND==='true'){
+            //             if (!localStorage.getItem(value.receiver)) {
+            //                 fetch(process.env.BACKEND_API + "/contracts/address/" + value.receiver).then(res => res.json())
+            //                 .then(function(data) {
+            //                     if (data) {
+            //                         window.transferTable.updateData([{id:value.id, receiver:data.data[0].name || data.data[0].label}]); 
+            //                     }
+            //                 })
+            //                 .catch(function(error) {
+            //                     console.log(error);
+            //                 });
+            //             } else {
+            //                 window.transferTable.updateData([{id:value.id, receiver:localStorage.getItem(value.receiver)}]);
+            //             }
+            //         }
+            //     }
 
-            }).catch(function(error) {
-                //query history errors
-                console.log(error);
-            });
+            // }).catch(function(error) {
+            //     //query history errors
+            //     console.log(error);
+            // });
 
         }).catch(function(error) {
+            if (error.toString().includes('no matched')){
+                window.keplr.suggestToken(process.env.CHAIN_ID, contractAddress).then((result)=>{
+                    console.log('aaa',result)
+                    queryData(contractAddress, undefined, data);
+                }).catch((err)=>{
+                    console.error(err);
+                })
+            }
             //get view key from keplr errors
             console.log(error);
         });
