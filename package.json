@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "dotenv-webpack": "^7.0.3",
-    "secretjs": "^0.11.0",
+    "secretjs": "^0.17.8",
     "tabulator-tables": "^4.9.3"
   }
 }
