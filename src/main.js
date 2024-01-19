@@ -31,6 +31,9 @@ const timeMutator =  function(value, data, type, params, component){
     }
 }
 
+const ContractDb = new Map();
+ContractDb.set('secret1tvhnydaakdp5tg2jhedhmc88nryjefn4j5dup2', 'ALTER Pay')
+
 
 window.onload = async () => {
 
@@ -77,12 +80,12 @@ function buildTable(decimals) {
             {title:"ID", field:"id", sorter:"number", headerTooltip: "Internal Transfer ID"},
             {title:"Time", field:"block_time", mutator:timeMutator, headerTooltip: "Transfer time. Not supported by all tokens."},
             {title:"Block Height", field:"block_height",  mutator:heightMutator, headerTooltip: "Transfer Block. Not supported by all tokens."}, 
-            {title:"TX Sender", field:"sender", headerTooltip: "Address or Contract that initiated the transfer."},
             {title:"From", field:"from", headerTooltip: "Address or contract that the token was deducted from."},
             {title:"To", field:"receiver", headerTooltip: "Address or contract that the token was credited to."},
             {title:"Amount", field:"amount", mutator:amountMutator, mutatorParams:{decimals:decimals}},
             {title:"Coin", field:"denom", mutator:coinMutator},
             {title:"Memo", field:"memo", headerTooltip: "Private memo. Not supported by all tokens."},
+            {title:"TX Sender", field:"sender", headerTooltip: "Address or Contract that initiated the transfer."},
         ],
     });
 
@@ -148,6 +151,9 @@ const queryData = async(contractAddress, viewKey, data) => {
                 } else {
                     window.transferTable.updateData([{id:value.id, from:localStorage.getItem(value.from)}]);
                 }
+            } else {
+                const dbName = ContractDb.get(value.from);
+                if (dbName) window.transferTable.updateData([{id: value.id, from: dbName}]); 
             }
 
             //Update "Sender" field with friendly names
@@ -166,6 +172,9 @@ const queryData = async(contractAddress, viewKey, data) => {
                 } else {
                     window.transferTable.updateData([{id:value.id, sender:localStorage.getItem(value.sender)}]);
                 }
+            } else {
+                const dbName = ContractDb.get(value.sender);
+                if (dbName) window.transferTable.updateData([{id: value.id, sender: dbName}]); 
             }
 
             //Update "Receiver" field with friendly names
@@ -183,6 +192,9 @@ const queryData = async(contractAddress, viewKey, data) => {
                 } else {
                     window.transferTable.updateData([{id:value.id, receiver:localStorage.getItem(value.receiver)}]);
                 }
+            } else {
+                const dbName = ContractDb.get(value.receiver);
+                if (dbName) window.transferTable.updateData([{id: value.id, receiver: dbName}]); 
             }
         }
 }
