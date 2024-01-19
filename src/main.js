@@ -55,7 +55,7 @@ window.onload = async () => {
     }
 
     // Keplr extension injects the offline signer that is compatible with secretJS.
-    if (!window.getOfflineSigner || !window.keplr) {
+    if (!window.keplr) {
         alert("Please install keplr extension");
         document.getElementById("address").append("Keplr not found. Please install Keplr extension for Chrome.");
     }
@@ -64,7 +64,7 @@ window.onload = async () => {
     await window.keplr.enable(process.env.CHAIN_ID);
     console.log("Keplr Enabled");
 
-    let offlineSigner = window.getOfflineSigner(process.env.CHAIN_ID);
+    let offlineSigner = window.keplr.getOfflineSigner(process.env.CHAIN_ID);
     window.accounts = await offlineSigner.getAccounts();
     console.log(window.accounts[0].address);
 
@@ -210,8 +210,8 @@ document.sendForm.onsubmit = () => {
         token_info: {}
     };
 
-    const offlineSigner = window.getOfflineSigner(process.env.CHAIN_ID);
-	const enigmaUtils = window.getEnigmaUtils(process.env.CHAIN_ID);
+    const offlineSigner = window.keplr.getOfflineSigner(process.env.CHAIN_ID);
+	const enigmaUtils = window.keplr.getEnigmaUtils(process.env.CHAIN_ID);
 
     secretJS = new SigningCosmWasmClient(
 		process.env.LCD_API,
@@ -321,9 +321,9 @@ document.sendForm.onsubmit = () => {
             // });
 
         }).catch(function(error) {
-            if (error.toString().includes('no matched')){
+            if (error.toString().includes('no matched') || error.toString().includes(`key doesn't exist`)){
                 window.keplr.suggestToken(process.env.CHAIN_ID, contractAddress).then((result)=>{
-                    console.log('aaa',result)
+                    console.log('Suggest Token', result)
                     queryData(contractAddress, undefined, data);
                 }).catch((err)=>{
                     console.error(err);
