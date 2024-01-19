@@ -37,9 +37,19 @@ window.onload = async () => {
     //prefill contract address
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    var contractAddress = urlParams.get('contract')
-    //onsole.log(contract);
-    //document.getElementById('contractSelector').value = contractAddress;
+    const contractAddress = urlParams.get('contract')
+    if (contractAddress) {
+        // document.getElementById('contractSelector').value = 'OtherContract';
+        $('#contractSelector').val('OtherContract');
+        $('#contractAddress').val(contractAddress);
+        $("#contractAddress").removeAttr("disabled");
+    }
+
+    const urlToken = urlParams.get('token');
+    if (urlToken) {
+        $('#contractSelector').val(urlToken);
+        $('#contractAddress').val(urlToken);
+    }
 
     // Keplr extension injects the offline signer that is compatible with secretJS.
     if (!window.getOfflineSigner || !window.keplr) {
@@ -110,7 +120,8 @@ const queryData = async(contractAddress, viewKey, data) => {
             transfer_history: {
                 address: window.accounts[0].address, 
                 key: viewKey,
-                page_size: 1000
+                page_size: 1000,
+                should_filter_decoys: true,
             } 
         };
         
