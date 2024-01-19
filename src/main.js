@@ -70,7 +70,7 @@ window.onload = async () => {
 
     document.getElementById("address").append(window.accounts[0].address);
     myStorage.setItem(window.accounts[0].address, "You");
-
+    ContractDb.set(window.accounts[0].address, "You")
 };
 
 function buildTable(decimals) {
